@@ -10,9 +10,9 @@ This project aims to create an Apple Pencil device for Unity's InputSystem packa
 1) A native code bridge, iOSApplePencil.hpp, which exposes methods we can call from Unity code.  UnityView+iOS.mm sends touch events to the bridge, which puts them in a buffer that both it and Unity can use directly.  The bridge then tells Unity when new events have been put in the buffer.  *(Note - The bridge is unfortunately written in C++ instead of Objective-C because I don't have a Mac and can't compile Objective-C code without going through Unity Cloud Build, meaning 20 minute compile times.  Writing it in C++ allows me to test it locally using fake events by compiling it into a DLL.)*
 1) An ApplePencil Device that acts as an InputSystem Pointer.
 
-**What's working currently:** This is a proof-of-concept that can get Apple Pencil events at 240hz on my iPad, with the original Apple Pencil (I don't have an Apple Pencil 2 to test with).  Right now it only sends position, pressure and tilt to Unity.
+**What's working currently:** Currently I can get Apple Pencil events at 240hz on my iPad, with the original Apple Pencil (I don't have an Apple Pencil 2 to test with).  Right now it only sends position, pressure and tilt to Unity.
 
-**To Use:** Follow these steps:
+**To use:** Follow these steps:
 1) In Player Settings in Unity, check the `allow unsafe code` option.  This lets us get a pointer to a memory buffer that we can share with the native code bridge.
 1) Put ApplePencil.cs in your Unity project.  To get the full 240hz, you'll need to use it with `onEvent()` like this:
 
