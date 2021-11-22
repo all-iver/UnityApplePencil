@@ -14,6 +14,7 @@ This project aims to create an Apple Pencil device for Unity's InputSystem packa
 
 **To use:** Follow these steps:
 1) In Player Settings in Unity, check the `allow unsafe code` option.  This lets us get a pointer to a memory buffer that we can share with the native code bridge.
+1) If not already done, make sure you have the new InputSystem enabled in Player Settings (under `Active Input Handling`).
 1) Put ApplePencil.cs in your Unity project.  To get the full 240hz, you'll need to use it with `onEvent()` like this:
 
         InputSystem.onEvent += OnInputEvent;
