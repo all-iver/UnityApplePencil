@@ -12,7 +12,7 @@
  * Put the DLL in your Unity Assets folder as a plugin, then write some test code to call AddApplePencilEvent() and 
  * FlushApplePencilEvents() from Unity to simulate pencil events.  I compiled to a DLL with g++ but I'm sure you could 
  * use Visual Studio or something instead.
- * g++ -D__UNITY_DLL__ -c iOSApplePencil.cpp -o iOSApplePencil.o; g++ iOSApplePencil.o -o iOSApplePencil.dll; rm iOSApplePencil.o
+ * g++ -D__UNITY_DLL__ -c -x c++ iOSApplePencil.hpp -o iOSApplePencil.o; g++ iOSApplePencil.o -o ../Assets/iOSApplePencil.dll; rm iOSApplePencil.o
  */
 
 #ifdef __UNITY_DLL__
@@ -49,8 +49,8 @@ typedef struct {
     float tiltX;
     float tiltY;
     unsigned short buttons;
-    float padding1X;
-    float padding1Y;
+    unsigned int estimationUpdateIndex;
+    float padding1;
     unsigned short padding2;
 } ApplePencilState;
 #pragma pack(pop)
@@ -72,12 +72,17 @@ public:
 
     // called from iOS code when it knows about a new pencil event - we add a new state to the buffer
     static void AddApplePencilEvent(float _positionX, float _positionY, bool tip, float pressure, float tiltX, 
-            float tiltY) {
+            float tiltY, unsigned int estimatedPropertiesExpectingUpdates, unsigned int estimationUpdateIndex,
+            bool isEstimationUpdate, bool isPredicted) {
         if (buffer == NULL || bufferLength == 0)
             return;
         buffer[bufferOffset].positionX = _positionX;
         buffer[bufferOffset].positionY = _positionY;
+        buffer[bufferOffset].estimationUpdateIndex = estimationUpdateIndex;
         buffer[bufferOffset].buttons = tip ? 1 : 0;
+        buffer[bufferOffset].buttons |= estimatedPropertiesExpectingUpdates << 1;
+        buffer[bufferOffset].buttons |= isEstimationUpdate << (1 + 4);
+        buffer[bufferOffset].buttons |= isPredicted << (2 + 4);
         buffer[bufferOffset].pressure = pressure;
         buffer[bufferOffset].tiltX = tiltX;
         buffer[bufferOffset].tiltY = tiltY;
@@ -135,10 +140,16 @@ UNITY_EXPORT void UnsetApplePencilEventHandler() {
     ApplePencilManager::lastNotifiedOffset = 0;
 }
 
+UNITY_EXPORT bool ApplePencilHandlerIsEnabled() {
+    return ApplePencilManager::handler != NULL;
+}
+
 // called by iOS when it knows about a new pencil event.  can also be called from Unity to fake an event for testing.
 UNITY_EXPORT void AddApplePencilEvent(float _positionX, float _positionY, bool tip, float pressure, float tiltX, 
-        float tiltY) {
-    ApplePencilManager::AddApplePencilEvent(_positionX, _positionY, tip, pressure, tiltX, tiltY);
+        float tiltY, unsigned int estimatedPropertiesExpectingUpdates, unsigned int estimationUpdateIndex, 
+        bool isEstimationUpdate, bool isPredicted) {
+    ApplePencilManager::AddApplePencilEvent(_positionX, _positionY, tip, pressure, tiltX, tiltY, 
+            estimatedPropertiesExpectingUpdates, estimationUpdateIndex, isEstimationUpdate, isPredicted);
 }
 
 // called by iOS when it wants to send new events to Unity.  can also be called from Unity for testing.
