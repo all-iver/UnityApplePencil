@@ -84,6 +84,8 @@ public struct ApplePencilState : IInputStateTypeInfo {
     public bool isEstimationUpdate => (buttons & (1 << ((int) UITouchProperty.Location + 1))) != 0;
 
     public bool isPredicted => (buttons & (1 << ((int) UITouchProperty.Location + 2))) != 0;
+
+    public bool isBarrelTap => (buttons & (1 << (int) UITouchProperty.Location + 3)) != 0;
 }
 
 }
@@ -217,6 +219,10 @@ public class ApplePencil : Pen {
                 useEvent = false;
             if (state.isPredicted && !enablePredictions)
                 useEvent = false;
+            if (state.isBarrelTap) {
+                useEvent = false;
+                Debug.Log($"Got barrel tap event");
+            }
 
             if (useEvent) {
                 // this sucks, but if it's an estimation update or a predicted touch, we don't want to change the 

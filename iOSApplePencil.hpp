@@ -91,6 +91,21 @@ public:
             bufferOffset = 0;
     }
 
+    static void AddApplePencilBarrelTapEvent() {
+        if (buffer == NULL || bufferLength == 0)
+            return;
+        buffer[bufferOffset].positionX = 0;
+        buffer[bufferOffset].positionY = 0;
+        buffer[bufferOffset].estimationUpdateIndex = 0;
+        buffer[bufferOffset].buttons = 1 << (3 + 4);
+        buffer[bufferOffset].pressure = 0;
+        buffer[bufferOffset].tiltX = 0;
+        buffer[bufferOffset].tiltY = 0;
+        bufferOffset ++;
+        if (bufferOffset >= bufferLength)
+            bufferOffset = 0;
+    }
+
     // called from iOS code when we want to send all the new events to Unity
     static void FlushApplePencilEvents() {
         if (buffer == NULL || bufferOffset == lastNotifiedOffset || handler == NULL)
@@ -150,6 +165,11 @@ UNITY_EXPORT void AddApplePencilEvent(float _positionX, float _positionY, bool t
         bool isEstimationUpdate, bool isPredicted) {
     ApplePencilManager::AddApplePencilEvent(_positionX, _positionY, tip, pressure, tiltX, tiltY, 
             estimatedPropertiesExpectingUpdates, estimationUpdateIndex, isEstimationUpdate, isPredicted);
+}
+
+// called by iOS when it gets a new barrel tap event.  can also be called from Unity for testing.
+UNITY_EXPORT void AddApplePencilBarrelTapEvent() {
+    ApplePencilManager::AddApplePencilBarrelTapEvent();
 }
 
 // called by iOS when it wants to send new events to Unity.  can also be called from Unity for testing.

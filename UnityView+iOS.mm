@@ -14,11 +14,20 @@
 
 extern bool _unityAppReady;
 
-@interface UnityView ()
+@interface UnityView () <UIPencilInteractionDelegate>
 @property (nonatomic, readwrite) ScreenOrientation contentOrientation;
 @end
 
 @implementation UnityView (iOS)
+
+bool addedPencilInteraction;
+
+- (void)pencilInteractionDidTap:(UIPencilInteraction*)interaction API_AVAILABLE(ios(12.1)) {
+    if (!interaction.enabled)
+        return;
+    AddApplePencilBarrelTapEvent();
+}
+
 - (void)willRotateToOrientation:(UIInterfaceOrientation)toOrientation fromOrientation:(UIInterfaceOrientation)fromOrientation;
 {
     // to support the case of interface and unity content orientation being different
@@ -149,6 +158,16 @@ extern bool _unityAppReady;
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+    // add the pencil interaction if it's not already there.  should really put this in some kind of init function.
+    if (!addedPencilInteraction) {
+        if (@available(iOS 12.1, *)) {
+            UIPencilInteraction* pencilInteraction = [[UIPencilInteraction alloc] init];
+            pencilInteraction.delegate = self;
+            [self addInteraction:pencilInteraction];
+        }
+        addedPencilInteraction = true;
+    }
+
     // fixme - can we ever get pencil touches and finger touches in the same event?
     NSSet *fingerTouches = [self getFingerTouches:touches];
     NSSet *pencilTouches = [self getPencilTouches:touches];
