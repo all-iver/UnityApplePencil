@@ -80,7 +80,7 @@ public:
         buffer[bufferOffset].positionY = _positionY;
         buffer[bufferOffset].estimationUpdateIndex = estimationUpdateIndex;
         buffer[bufferOffset].buttons = tip ? 1 : 0;
-        buffer[bufferOffset].buttons |= estimatedPropertiesExpectingUpdates << 1;
+        buffer[bufferOffset].buttons |= (estimatedPropertiesExpectingUpdates & 0xf) << 1;
         buffer[bufferOffset].buttons |= isEstimationUpdate << (1 + 4);
         buffer[bufferOffset].buttons |= isPredicted << (2 + 4);
         buffer[bufferOffset].pressure = pressure;
